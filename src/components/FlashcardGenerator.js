@@ -14,21 +14,14 @@ const FlashcardGenerator = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!file) {
-      setError("Please upload a file.");
-      return;
-    }
-
     const formData = new FormData();
     formData.append("file", file);
     setLoading(true);
     setError(null);
 
     try {
-      // Send the file to the backend
       const response = await axios.post(
-        "http://localhost:5000/upload", // Change to your backend endpoint
+        "http://localhost:5000/upload",
         formData,
         {
           headers: {
@@ -36,26 +29,27 @@ const FlashcardGenerator = () => {
           },
         }
       );
-      // Assuming the API returns an array of flashcards with 'question' and 'answer'
       setFlashcards(response.data.flashcards);
-
     } catch (error) {
       console.error("Error uploading file", error);
-
       if (error.response) {
-        // Handle server-side errors
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+        console.error("Response headers:", error.response.headers);
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
         setError(
           `Server error: ${
             error.response.data.message || error.response.statusText
           }`
         );
       } else if (error.request) {
-        // Handle cases where no response is received
+        // The request was made but no response was received
         setError(
-          "No response received from the server. Check if the server is running."
+          "No response received from server. Please check if the server is running."
         );
       } else {
-        // Handle other errors
+        // Something happened in setting up the request that triggered an Error
         setError(`Error: ${error.message}`);
       }
     } finally {
@@ -63,15 +57,11 @@ const FlashcardGenerator = () => {
     }
   };
 
-
-  
-
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">
-        Upload PDF/PPT to Generate Flashcards using Google Generative AI
+        Upload PDF/PPT to Generate Flashcards
       </h1>
-
       <form onSubmit={handleSubmit} className="mb-4">
         <input
           type="file"
@@ -85,7 +75,7 @@ const FlashcardGenerator = () => {
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           disabled={loading}
         >
-          {loading ? "Uploading..." : "Upload & Generate Flashcards"}
+          {loading ? "Uploading..." : "Upload"}
         </button>
       </form>
 
