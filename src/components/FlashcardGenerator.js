@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import axios from "axios";
 import logo from "../assets/white-logo.png";
 import BackgroundSVG from "../components/BackgroundSVG";
+import AnimatedLoader from "../components/AnimatedLoader";
 
 const FlashcardGenerator = () => {
   const fileInputRef = useRef(null); // Create a ref for the file input
@@ -10,6 +11,14 @@ const FlashcardGenerator = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [isAnswerVisible, setIsAnswerVisible] = useState(false);
+
+  const [selectedOption, setSelectedOption] = useState(null); // To track selected option
+
+  const toggleAnswerVisibility = () => {
+    setIsAnswerVisible(!isAnswerVisible);
+  };
+
   const handleFileChange = async (e) => {
     e.preventDefault();
 
@@ -60,6 +69,29 @@ const FlashcardGenerator = () => {
       setLoading(false);
     }
   };
+
+  const currentCard = flashcards[currentCardIndex];
+
+  const handleOptionClick = (option) => {
+    setSelectedOption(option); // Set the selected option
+    setIsAnswerVisible(true); // Reveal the answer after clicking
+  };
+
+  const resetStates = () => {
+    setSelectedOption(null); // Reset the selected option when moving to the next/previous card
+    setIsAnswerVisible(false); // Reset answer visibility
+  };
+
+const extractAnswerLetter = (option) => {
+  // Trim the input and replace unwanted characters, keeping only the first letter (A, B, C, D, etc.)
+  const cleanedOption = option
+    .trim()
+    .replace(/[^A-Z\s]/gi, "")
+    .charAt(0)
+    .toUpperCase();
+  return cleanedOption.match(/[A-Z]/) ? cleanedOption : null; // Return the letter or null if it's not A-Z
+};
+
 
   const nextCard = () => {
     setCurrentCardIndex((prevIndex) => (prevIndex + 1) % flashcards.length);
@@ -234,123 +266,187 @@ const FlashcardGenerator = () => {
 
         {/* Right Section */}
         <div className="hidden md:block w-[26rem] mt-[-5rem] mr-[11rem] text-center">
-          <div className="border-4 border-orange-500 rounded-md py-6 px-4">
-            <h3 className="text-lg font-bold mb-4">
-              Preview your generated flashcards
-            </h3>
+          <div className=" rounded-md py-6 px-4">
+            {!loading && !flashcards.length ? (
+              <form className="space-y-4">
+                <label className="block">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept=".pdf, .pptx"
+                    required
+                    className=" w-full text-sm text-gray-300
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-orange-500 file:text-white
+                            hover:file:bg-orange-600 hidden"
+                  />
 
-            {/* Upload Form */}
+                  <h3 className="text-xl  mb-4 font-sans">
+                    Preview your generated flashcards
+                  </h3>
+                  <div className="flex justify-center items-center space-x-4">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current.click()}
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-md"
+                    >
+                      Click here to Upload a File
+                    </button>
+                  </div>
+                </label>
 
-            <form className="space-y-4 ">
-              <label className="block">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept=".pdf, .pptx"
-                  required
-                  className=" w-full text-sm text-gray-300
-                           file:mr-4 file:py-2 file:px-4
-                           file:rounded-full file:border-0
-                           file:text-sm file:font-semibold
-                           file:bg-orange-500 file:text-white
-                           hover:file:bg-orange-600 hidden"
-                />
-                <div className="flex  justify-center items-center space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current.click()}
-                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-md"
-                  >
-                    Click here to Upload a File
-                  </button>
+                <p className="text-sm text-gray-400">
+                  Supported Files: <span className="font-bold">PDF, PPT</span>
+                </p>
 
-                  {/* <span id="fileName" className="text-gray-400">
-                    {file ? file.name : "No file selected"}{" "}
-                    {/* Display the file name */}
-
-                  {/* </span> */}
+                <div className="m-5 flex justify-center items-center">
+                  <div class="w-[100px] mb-[10px] mr-[15px] pt-[15px] border-b float-left"></div>
+                  <div class="text-sm font-medium text-gray-300 float-left">
+                    or try
+                  </div>
+                  <div class="w-[100px] mb-[10px] ml-[15px] pt-[15px] border-b  float-left"></div>
                 </div>
-              </label>
 
-              {/* <button
-              type="submit"
-              className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-md"
-              disabled={loading}
-            >
-              {loading ? "Uploading..." : "Click here to upload a file"}
-            </button> */}
+                <div className="flex justify-center space-x-4 mt-4">
+                  <button className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md">
+                    YouTube
+                  </button>
+                  <button className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md">
+                    Wikipedia
+                  </button>
+                </div>
+              </form>
+            ) : loading ? (
+              <p className="text-xl flex flex-col  text-gray-400">
+                <p className="font-sans mb-10">Generating flashcards...</p>
+                {/* Loading Spinner */}
+                <AnimatedLoader />
 
-              {loading && (
-                <p className="text-sm text-gray-400 font-bold">
+                <p className="font-sans">
                   This should take only few seconds...
                 </p>
-              )}
-
-              <p className="text-sm text-gray-400">
-                Supported Files: <span className="font-bold">PDF, PPT</span>
               </p>
-            </form>
+            ) : (
+              <div className=" rounded-md py-6 px-4 bg-white h-[19rem] text-black w-[28rem]">
+                {/* Flashcard Navigation */}
+                {flashcards.length > 0 && (
+                  <div className="-mt-2">
+                    <div className="flex items-normal justify-between">
+                      <button
+                        onClick={() => {
+                          prevCard();
+                          setIsAnswerVisible(false); // Reset answer visibility when moving to the previous card
+                          resetStates();
+                        }}
+                        className="bg-gradient-to-r  right-[5rem] from-gray-200 to-gray-300 top-12 relative h-[3rem] min-w-[3rem] rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-gray-300 hover:to-gray-400 shadow-md transform hover:scale-105 transition-all duration-300 ease-in-out"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          className="w-6 h-6 text-black"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 19l-7-7 7-7"
+                          />
+                        </svg>
+                      </button>
+
+                      <div className="text-center">
+                        {/* Flashcard Question */}
+                        {flashcards.length > 0 && (
+                          <div>
+                            <div className="text-center">
+                              <div className="text-lg font-semibold">
+                                {currentCard.question}
+                               
+                              </div>
+                              <hr className="border-gray-700 my-3 w-full mx-auto opacity-80" />
+
+                              {/* Render MCQ Options if the type is 'MCQ' */}
+                              {currentCard.type === "MCQ" ? (
+                                <div className="mcq-options flex flex-col space-y-2">
+                                  {currentCard.options.map((option, index) => (
+                                    <button
+                                      key={index}
+                                      onClick={() => handleOptionClick(option)}
+                                      className={`py-1 px-4 rounded-lg shadow-md 
+                      ${
+                        selectedOption
+                          ? extractAnswerLetter(option) === currentCard.answer
+                            ? "bg-green-400 text-white" // Correct option - green
+                            : option === selectedOption
+                            ? "bg-red-400 text-white" // Incorrect option - red
+                            : "bg-gray-200" // Unselected options remain neutral
+                          : "bg-gray-200 hover:bg-gray-300"
+                      } transition-all duration-300 ease-in-out`}
+                                      disabled={selectedOption !== null} // Disable once an option is selected
+                                    >
+                                      {option}
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div
+                                  className="flashcard-container p-4 bg-gray-100 rounded-lg shadow-md"
+                                  onClick={() =>
+                                    setIsAnswerVisible(!isAnswerVisible)
+                                  } // Click to reveal the answer
+                                >
+                                  {isAnswerVisible ? (
+                                    <div className="text-md mt-2">
+                                      {currentCard.answer}
+                                    </div>
+                                  ) : (
+                                    <div className="text-md mt-2 text-gray-400 italic">
+                                      Click to reveal the answer
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          nextCard();
+                          setIsAnswerVisible(false);
+                          resetStates(); // Reset answer visibility when moving to the next card
+                        }}
+                        className="bg-gradient-to-r from-gray-200 to-gray-300 top-12 relative left-[5rem] h-[3rem] min-w-[3rem] rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-gray-300 hover:to-gray-400 shadow-md transform hover:scale-105 transition-all duration-300 ease-in-out"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          className="w-6 h-6 text-black"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Error Message */}
             {error && <p className="text-red-500 mt-4">{error}</p>}
-
-            <div className="m-5 flex justify-center items-center">
-              <div class="w-[100px] mb-[10px] mr-[15px] pt-[15px] border-b float-left"></div>
-              <div class="text-sm font-medium text-gray-300 float-left">
-                or try
-              </div>
-              <div class="w-[100px] mb-[10px] ml-[15px] pt-[15px] border-b  float-left"></div>
-            </div>
-
-            {/* <p className="text-sm mt-[7px] font-medium text-gray-300">
-              -----------or try-----------
-            </p> */}
-
-            <div className="flex justify-center space-x-4 mt-4">
-              <button className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md">
-                YouTube
-              </button>
-              <button className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md">
-                Wikipedia
-              </button>
-            </div>
-
-            {/* Flashcard Section */}
-            {flashcards.length > 0 && (
-              <div className="mt-8">
-                <h2 className="text-2xl font-bold mb-4">
-                  Generated Flashcards
-                </h2>
-
-                {/* Flashcard Navigation */}
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={prevCard}
-                    className="bg-gray-200 hover:bg-gray-300 text-black font-bold py-2 px-4 rounded-full"
-                  >
-                    &#8592;
-                  </button>
-
-                  <div className="text-center">
-                    <div className="text-lg font-semibold">
-                      <strong>Q:</strong>{" "}
-                      {flashcards[currentCardIndex].question}
-                    </div>
-                    <div className="text-md mt-2">
-                      <strong>A:</strong> {flashcards[currentCardIndex].answer}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={nextCard}
-                    className="bg-gray-200 hover:bg-gray-300 text-black font-bold py-2 px-4 rounded-full"
-                  >
-                    &#8594;
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
