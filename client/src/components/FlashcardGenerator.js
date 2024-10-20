@@ -5,15 +5,14 @@ import BackgroundSVG from "../components/BackgroundSVG";
 import AnimatedLoader from "../components/AnimatedLoader";
 
 const FlashcardGenerator = () => {
-  const fileInputRef = useRef(null); // Create a ref for the file input
+  const fileInputRef = useRef(null); 
   const [file, setFile] = useState(null);
   const [flashcards, setFlashcards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isAnswerVisible, setIsAnswerVisible] = useState(false);
-
-  const [selectedOption, setSelectedOption] = useState(null); // To track selected option
+  const [selectedOption, setSelectedOption] = useState(null); 
 
   const toggleAnswerVisibility = () => {
     setIsAnswerVisible(!isAnswerVisible);
@@ -32,7 +31,7 @@ const FlashcardGenerator = () => {
     formData.append("file", selectedFile);
 
     setLoading(true);
-    setError(null); // Clear any previous errors
+    setError(null);
 
     try {
       const response = await axios.post(
@@ -49,7 +48,7 @@ const FlashcardGenerator = () => {
     } catch (error) {
       console.error("Error uploading file:", error);
       if (error.response) {
-        // Server responded with a status code outside the 2xx range
+       
         console.error("Response data:", error.response.data);
         setError(
           `Server error: ${
@@ -57,12 +56,12 @@ const FlashcardGenerator = () => {
           }`
         );
       } else if (error.request) {
-        // No response was received
+    
         setError(
           "No response received from server. Please check if the server is running."
         );
       } else {
-        // Something else happened
+      
         setError(`Error: ${error.message}`);
       }
     } finally {
@@ -73,23 +72,23 @@ const FlashcardGenerator = () => {
   const currentCard = flashcards[currentCardIndex];
 
   const handleOptionClick = (option) => {
-    setSelectedOption(option); // Set the selected option
-    setIsAnswerVisible(true); // Reveal the answer after clicking
+    setSelectedOption(option); 
+    setIsAnswerVisible(true);
   };
 
   const resetStates = () => {
-    setSelectedOption(null); // Reset the selected option when moving to the next/previous card
-    setIsAnswerVisible(false); // Reset answer visibility
+    setSelectedOption(null); 
+    setIsAnswerVisible(false); 
   };
 
 const extractAnswerLetter = (option) => {
-  // Trim the input and replace unwanted characters, keeping only the first letter (A, B, C, D, etc.)
+ 
   const cleanedOption = option
     .trim()
     .replace(/[^A-Z\s]/gi, "")
     .charAt(0)
     .toUpperCase();
-  return cleanedOption.match(/[A-Z]/) ? cleanedOption : null; // Return the letter or null if it's not A-Z
+  return cleanedOption.match(/[A-Z]/) ? cleanedOption : null; 
 };
 
 
@@ -127,20 +126,19 @@ const extractAnswerLetter = (option) => {
   //       console.error("Response data:", error.response.data);
   //       console.error("Response status:", error.response.status);
   //       console.error("Response headers:", error.response.headers);
-  //       // The request was made and the server responded with a status code
-  //       // that falls out of the range of 2xx
+
   //       setError(
   //         `Server error: ${
   //           error.response.data.message || error.response.statusText
   //         }`
   //       );
   //     } else if (error.request) {
-  //       // The request was made but no response was received
+ 
   //       setError(
   //         "No response received from server. Please check if the server is running."
   //       );
   //     } else {
-  //       // Something happened in setting up the request that triggered an Error
+ 
   //       setError(`Error: ${error.message}`);
   //     }
   //   } finally {
@@ -338,7 +336,7 @@ const extractAnswerLetter = (option) => {
                       <button
                         onClick={() => {
                           prevCard();
-                          setIsAnswerVisible(false); // Reset answer visibility when moving to the previous card
+                          setIsAnswerVisible(false); 
                           resetStates();
                         }}
                         className="bg-gradient-to-r  right-[5rem] from-gray-200 to-gray-300 top-12 relative h-[3rem] min-w-[3rem] rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-gray-300 hover:to-gray-400 shadow-md transform hover:scale-105 transition-all duration-300 ease-in-out"
@@ -387,7 +385,7 @@ const extractAnswerLetter = (option) => {
                             : "bg-gray-200" // Unselected options remain neutral
                           : "bg-gray-200 hover:bg-gray-300"
                       } transition-all duration-300 ease-in-out`}
-                                      disabled={selectedOption !== null} // Disable once an option is selected
+                                      disabled={selectedOption !== null} 
                                     >
                                       {option}
                                     </button>
@@ -398,7 +396,7 @@ const extractAnswerLetter = (option) => {
                                   className="flashcard-container p-4 bg-gray-100 rounded-lg shadow-md"
                                   onClick={() =>
                                     setIsAnswerVisible(!isAnswerVisible)
-                                  } // Click to reveal the answer
+                                  } 
                                 >
                                   {isAnswerVisible ? (
                                     <div className="text-md mt-2">
@@ -420,7 +418,7 @@ const extractAnswerLetter = (option) => {
                         onClick={() => {
                           nextCard();
                           setIsAnswerVisible(false);
-                          resetStates(); // Reset answer visibility when moving to the next card
+                          resetStates();
                         }}
                         className="bg-gradient-to-r from-gray-200 to-gray-300 top-12 relative left-[5rem] h-[3rem] min-w-[3rem] rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-gray-300 hover:to-gray-400 shadow-md transform hover:scale-105 transition-all duration-300 ease-in-out"
                       >

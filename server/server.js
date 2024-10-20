@@ -72,7 +72,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   }
 });
 
-// New function to generate flashcards from AI
+
 async function generateFlashcardsFromAI(textContent) {
   const genAI = new GoogleGenerativeAI(process.env.API_KEY);
   const fileManager = new GoogleAIFileManager(process.env.API_KEY);
@@ -81,11 +81,11 @@ async function generateFlashcardsFromAI(textContent) {
       "Sending text to Google Generative AI for flashcard generation..."
     );
 
-    // Temporarily create a file with the text content
+   
     const tempFilePath = path.join(__dirname, "uploads", "tempText.txt");
     fs.writeFileSync(tempFilePath, textContent);
 
-    // Upload the temporary file
+  
     const uploadResponse = await fileManager.uploadFile(tempFilePath, {
       mimeType: "text/plain",
       displayName: "Temporary Text Content",
@@ -97,7 +97,7 @@ async function generateFlashcardsFromAI(textContent) {
       model: "gemini-1.5-flash",
     });
 
-    // Generate flashcards from the uploaded text content
+   
     const result = await model.generateContent([
       {
         fileData: {
@@ -113,7 +113,6 @@ async function generateFlashcardsFromAI(textContent) {
     const aiResponseText = result.response.text();
     console.log("AI Response:", aiResponseText);
 
-    // Parse the response to extract flashcards
     const flashcards = parseFlashcards(aiResponseText);
     return flashcards;
   } catch (err) {
@@ -122,8 +121,6 @@ async function generateFlashcardsFromAI(textContent) {
   }
 }
 
-// Function to parse flashcards from the AI response
-// Function to parse flashcards from the AI response
 function parseFlashcards(text) {
   const flashcards = [];
   const lines = text.split("\n");
@@ -131,31 +128,31 @@ function parseFlashcards(text) {
   let isMCQ = false;
 
   lines.forEach((line) => {
-    line = line.trim(); // Remove any leading or trailing whitespace
+    line = line.trim(); 
 
-    // Check for 'Front:' which indicates the front of a flashcard
+   
     if (line.startsWith("**Front:**")) {
-      // If there's already a card being built, push it to the flashcards array
+     
       if (currentCard.question) {
         if (isMCQ) {
-          // Check if it's an MCQ
+         
           flashcards.push({ ...currentCard, type: "MCQ" });
         } else if (currentCard.answer) {
           flashcards.push(currentCard);
         }
       }
-      // Start a new card
+    
       currentCard = { question: line.replace("**Front:**", "").trim() };
       isMCQ = false;
     }
 
-    // Check for 'Options:' which indicates multiple-choice answers
+  
     if (line.startsWith("**Options:**")) {
       currentCard.options = [];
       isMCQ = true;
     }
 
-    // Parse each option if it's an MCQ
+  
     if (
       (isMCQ &&
         (line.startsWith("A.") ||
@@ -174,13 +171,12 @@ function parseFlashcards(text) {
       currentCard.options.push(line.trim());
     }
 
-    // Check for 'Back:' which indicates the answer
+  
     if (line.startsWith("**Back:**")) {
       currentCard.answer = line.replace("**Back:**", "").trim();
     }
   });
 
-  // Push the last card if it's complete
   if (currentCard.question) {
     if (isMCQ) {
       flashcards.push({ ...currentCard, type: "MCQ" });
@@ -192,11 +188,13 @@ function parseFlashcards(text) {
   return flashcards;
 }
 
-// Function to extract text from PPT files (you may need to implement this)
+
 async function extractTextFromPpt(filePath) {
-  // Your implementation here
-  return ""; // Replace with actual extracted text
+  
+  return ""; 
 }
+
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
