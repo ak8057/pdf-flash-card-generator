@@ -1,14 +1,13 @@
 import React from "react";
 import FlashcardGenerator from "./components/FlashcardGenerator";
-
+import WaveDesign from "./components/WaveDesign";
 
 const App = () => {
   
   return (
     <div>
-      <h1>Flashcard Creator</h1>
-      <FlashcardGenerator/>
-     
+      <FlashcardGenerator />
+      <WaveDesign />
     </div>
   );
 };
