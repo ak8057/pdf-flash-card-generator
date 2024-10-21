@@ -35,7 +35,7 @@ const FlashcardGenerator = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/upload",
+        "https://pdf-flash-card-generator.onrender.com/upload",
         formData,
         {
           headers: {
